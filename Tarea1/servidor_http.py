@@ -19,7 +19,6 @@ with open(ruta_config) as archivo:
 # HTTP es orientado a conexion -> TCP (SOCK_STREAM)
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # evita "Address already in use" al reiniciar
-server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server_socket.bind((ip, puerto))
 server_socket.listen(5)
 print(f"Escuchando en http://{ip}:{puerto}")

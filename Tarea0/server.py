@@ -2,7 +2,7 @@ import socket
 
 if __name__ == "__main__":
     # definimos el tamaño del buffer de recepción y la secuencia de fin de mensaje
-    buff_size = 10
+    buff_size = 4
     new_socket_address = ('localhost', 5000)
 
     print('Creando socket - Servidor')

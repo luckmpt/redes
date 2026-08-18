@@ -18,7 +18,7 @@ def parse_HTTP_message(http_message: bytes) -> dict:
     # la primera linea es la start line
     start_line = lines[0].decode("latin-1")
     # guardamos los headers como pares (nombre, valor)
-    headers = []
+    headers = {}
     # las lineas restantes son un header cada una
     for line in lines[1:]:
         # saltamos lineas vacias
@@ -30,7 +30,7 @@ def parse_HTTP_message(http_message: bytes) -> dict:
         if not sep:
             continue
         # guardamos sin espacios sobrantes
-        headers.append((name.strip(), value.strip()))
+        headers[name.strip()] = value.strip()
     # estructura de datos que devolvemos
     parsed = {"start_line": start_line, "headers": headers, "body": body}
     # la start line tiene tres campos separados por espacio
@@ -61,8 +61,8 @@ def create_HTTP_message(parsed: dict) -> bytes:
     # la start line termina en \r\n
     message = start_line.rstrip().encode("latin-1") + CRLF
     # cada header ocupa una linea
-    for name, value in parsed.get("headers", []):
-        message += "{}: {}".format(name, value).encode("latin-1") + CRLF
+    for name in parsed["headers"]:
+        message += "{}: {}".format(name, parsed["headers"][name]).encode("latin-1") + CRLF
     # linea vacia: marca el fin de los headers
     message += CRLF
     # el body se concatena tal cual, en bytes

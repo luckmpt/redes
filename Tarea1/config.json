@@ -1,5 +1,5 @@
 {
-  "user": "juxinxu33@gmail.com",
+  "user": "lpoblete@dcc.uchile.cl",
   "blocked": ["www.dcc.uchile.cl", "cc4303.bachmann.cl/secret"],
   "forbidden_words": [{"proxy": "[REDACTED]"}, {"DCC": "[FORBIDDEN]"}, {"biblioteca": "[???]"}]
 }

@@ -12,6 +12,7 @@ HTML = "<html><body><h1>Hola</h1><p>Usuario: {user}</p></body></html>"
 ruta_config = sys.argv[1] if len(sys.argv) > 1 else "config.json"
 ip = sys.argv[2] if len(sys.argv) > 2 else "127.0.0.1"
 puerto = int(sys.argv[3]) if len(sys.argv) > 3 else 8000
+# python3 servidor_http.py config.json 192.168.1.176 8000
 
 with open(ruta_config) as archivo:
     user = json.load(archivo)["user"]

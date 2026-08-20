@@ -1,94 +1,126 @@
-#PArte 1
+"""Parte 2: proxy HTTP que bloquea dominios y censura palabras.
 
+Uso: python3 proxy.py [config.json] [ip] [puerto] [buff_size]
+"""
+
+import json
 import socket
 import sys
-import json
 
-from http_utils import create_HTTP_message, parse_HTTP_message
+from http_utils import create_HTTP_message, del_header, recv_HTTP_message
 
 ruta_config = sys.argv[1] if len(sys.argv) > 1 else "config.json"
-
-with open("error.html", "rb") as archivo:
-    html = archivo.read().decode("latin-1")
+ip = sys.argv[2] if len(sys.argv) > 2 else "0.0.0.0"
+puerto = int(sys.argv[3]) if len(sys.argv) > 3 else 8000
+buff_size = int(sys.argv[4]) if len(sys.argv) > 4 else 1024
 
 with open(ruta_config) as archivo:
     config = json.load(archivo)
 
 user = config["user"]
 blocked = config["blocked"]
-forbidden_words = config["forbidden_words"] 
+forbidden_words = config["forbidden_words"]
+
+with open("error.html", "rb") as archivo:
+    html_403 = archivo.read()
+
+with open("403.jpeg", "rb") as archivo:
+    imagen_403 = archivo.read()
 
 
-def is_blocked(target):
+def separar_target(target):
+    """Del target de la request saca (host, puerto, ruta)."""
     if target.startswith("http://"):
         target = target[7:]
-    elif target.startswith("https://"):
-        target = target[8:]
+    host, _, ruta = target.partition("/")
+    ruta = "/" + ruta
+    # el host puede venir como "dominio:puerto"
+    if ":" in host:
+        host, _, p = host.partition(":")
+        return host, int(p), ruta
+    return host, 80, ruta
 
-    for blocked_target in blocked:
-        if target == blocked_target:
-            return True
-        if target.startswith(blocked_target + "/"):
-            return True
 
+def esta_bloqueado(host, ruta):
+    """True si el destino aparece en la lista blocked del config."""
+    for prohibido in blocked:
+        if host == prohibido or (host + ruta).startswith(prohibido):
+            return True
     return False
 
-ip = "10.80.99.71"
-puerto = 8000
 
-# HTTP es orientado a conexion -> TCP (SOCK_STREAM)
+def armar_respuesta(status, reason, tipo, cuerpo):
+    """Arma una respuesta HTTP propia del proxy (403 o imagen)."""
+    return {
+        "type": "response",
+        "version": "HTTP/1.1",
+        "status_code": status,
+        "reason": reason,
+        "headers": {
+            "Content-Type": tipo,
+            "Content-Length": str(len(cuerpo)),
+            "X-ElQuePregunta": user,
+            "Connection": "close",
+        },
+        "body": cuerpo,
+    }
+
+
+def censurar(body):
+    """Reemplaza las palabras prohibidas dentro del body."""
+    for par in forbidden_words:
+        for palabra, reemplazo in par.items():
+            body = body.replace(palabra.encode("latin-1"), reemplazo.encode("latin-1"))
+    return body
+
+
 proxy_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# evita "Address already in use" al reiniciar
-# proxy_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+proxy_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 proxy_socket.bind((ip, puerto))
-proxy_socket.listen(3)
-print(f"Escuchando en http://{ip}:{puerto}")
+proxy_socket.listen(5)
+print(f"Proxy escuchando en {ip}:{puerto} (buff_size={buff_size})")
 
 while True:
-    # accept devuelve un socket nuevo dedicado a este cliente
     client_socket, address = proxy_socket.accept()
-    # buffer grande por ahora; se achica en la Parte 2
-    data = client_socket.recv(1024)
-    if not data:
-        client_socket.close()
-        continue
-    request = parse_HTTP_message(data)
-    print(request["method"], request["target"])
-    target = request["target"]
-    if target.startswith("http://"):
-        target = target[7:]
-    elif target.startswith("https://"):
-        target = target[8:]
-    server_host = target.split("/", 1)[0]
-    if is_blocked(request["target"]):
-        response = (
-            "HTTP/1.1 200 OK\r\n"
-            "Content-Type: text/html; charset=utf-8\r\n"
-            "Content-Length: "+str(len(html))+"\r\n"
-            "Connection: keep-alive\r\n"
-            "Access-Control-Allow-Origin: *\r\n"
-            "X-ElQuePregunta: "+user+"\r\n\r\n" +
-            html
-        ).encode("latin-1")
-        client_socket.sendall(response)
-    else:
-        socket_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print(f"Conectando a {server_host}:80")
-        socket_server.connect((server_host, 80))
-        socket_server.sendall(data)
-        data_server = socket_server.recv(1024)
-        if not data_server:
-            socket_server.close()
-            client_socket.close()
+    try:
+        request = recv_HTTP_message(client_socket, buff_size)
+        if request is None:
             continue
-        response_server = parse_HTTP_message(data_server)
-        body = response_server["body"]
-        for word in forbidden_words:
-            for forbidden, replacement in word.items():
-                body = body.replace(forbidden.encode("latin-1"), replacement.encode("latin-1"))
-        response_server["body"] = body
-        response_server["headers"]["Content-Length"] = str(len(body))
-        data_server = create_HTTP_message(response_server)
-        client_socket.sendall(data_server)
-        socket_server.close()
-    client_socket.close()
+        host, puerto_destino, ruta = separar_target(request["target"])
+        print(request["method"], host, ruta)
+
+        if ruta.endswith("/403.jpeg"):
+            # la imagen del 403 la sirve el proxy desde el disco
+            respuesta = armar_respuesta("200", "OK", "image/jpeg", imagen_403)
+            client_socket.sendall(create_HTTP_message(respuesta))
+
+        elif esta_bloqueado(host, ruta):
+            respuesta = armar_respuesta("403", "Forbidden", "text/html; charset=utf-8", html_403)
+            client_socket.sendall(create_HTTP_message(respuesta))
+
+        else:
+            # el servidor final espera la ruta sola, no la URL completa
+            request["target"] = ruta
+            request["headers"]["X-ElQuePregunta"] = user
+            request["headers"]["Connection"] = "close"
+            # sin gzip, si no el body viene comprimido y no se puede censurar
+            request["headers"]["Accept-Encoding"] = "identity"
+            del_header(request, "Proxy-Connection")
+
+            server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            server_socket.connect((host, puerto_destino))
+            server_socket.sendall(create_HTTP_message(request))
+            # a un HEAD el servidor responde sin body
+            respuesta = recv_HTTP_message(server_socket, buff_size, request["method"] != "HEAD")
+            server_socket.close()
+
+            if respuesta is not None:
+                respuesta["body"] = censurar(respuesta["body"])
+                # el largo cambia al censurar, hay que recalcularlo
+                respuesta["headers"]["Content-Length"] = str(len(respuesta["body"]))
+                respuesta["headers"]["Connection"] = "close"
+                client_socket.sendall(create_HTTP_message(respuesta))
+    except Exception as error:
+        print("error:", error)
+    finally:
+        client_socket.close()

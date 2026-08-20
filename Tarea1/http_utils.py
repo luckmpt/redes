@@ -67,3 +67,86 @@ def create_HTTP_message(parsed: dict) -> bytes:
     message += CRLF
     # el body se concatena tal cual, en bytes
     return message + parsed.get("body", b"")
+
+def get_header(parsed, name):
+    """Busca un header sin distinguir mayusculas. Devuelve None si no esta."""
+    for key in parsed["headers"]:
+        if key.lower() == name.lower():
+            return parsed["headers"][key]
+    return None
+
+
+def del_header(parsed, name):
+    """Elimina un header sin distinguir mayusculas."""
+    for key in list(parsed["headers"]):
+        if key.lower() == name.lower():
+            del parsed["headers"][key]
+
+
+def recv_n(sock, buff_size, buffer, n):
+    """Sigue recibiendo hasta juntar n bytes (o hasta que cierren)."""
+    while len(buffer) < n:
+        chunk = sock.recv(buff_size)
+        if not chunk:
+            break
+        buffer += chunk
+    return buffer
+
+
+def recv_chunked(sock, buff_size, buffer):
+    """Lee un body con Transfer-Encoding: chunked y lo devuelve armado."""
+    body = b""
+    while True:
+        # cada chunk empieza con su largo en hexadecimal y un \r\n
+        while CRLF not in buffer:
+            chunk = sock.recv(buff_size)
+            if not chunk:
+                return body
+            buffer += chunk
+        linea, _, buffer = buffer.partition(CRLF)
+        largo = int(linea.split(b";")[0].strip(), 16)
+        # el chunk de largo 0 marca el final
+        if largo == 0:
+            return body
+        buffer = recv_n(sock, buff_size, buffer, largo + 2)
+        body += buffer[:largo]
+        # +2 para saltarse el \r\n que cierra el chunk
+        buffer = buffer[largo + 2:]
+
+
+def recv_HTTP_message(sock, buff_size, con_body=True):
+    """Recibe un mensaje HTTP completo, con un buffer de cualquier tamano."""
+    data = b""
+    # los headers estan completos recien cuando aparece \r\n\r\n
+    while HEADERS_END not in data:
+        chunk = sock.recv(buff_size)
+        if not chunk:
+            break
+        data += chunk
+    if not data:
+        return None
+    head, _, body = data.partition(HEADERS_END)
+    parsed = parse_HTTP_message(head + HEADERS_END)
+
+    largo = get_header(parsed, "Content-Length")
+    chunked = get_header(parsed, "Transfer-Encoding")
+    if not con_body:
+        body = b""
+    elif chunked and "chunked" in chunked.lower():
+        body = recv_chunked(sock, buff_size, body)
+        del_header(parsed, "Transfer-Encoding")
+        parsed["headers"]["Content-Length"] = str(len(body))
+    elif largo is not None:
+        body = recv_n(sock, buff_size, body, int(largo))[:int(largo)]
+    elif parsed["type"] == "response":
+        # sin Content-Length ni chunked, el mensaje termina cuando cierran
+        while True:
+            chunk = sock.recv(buff_size)
+            if not chunk:
+                break
+            body += chunk
+        parsed["headers"]["Content-Length"] = str(len(body))
+    else:
+        body = b""
+    parsed["body"] = body
+    return parsed

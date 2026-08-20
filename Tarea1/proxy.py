@@ -86,19 +86,30 @@ while True:
         request = recv_HTTP_message(client_socket, buff_size)
         if request is None:
             continue
+        if not request["target"].startswith("http://"):
+            # peticion directa al proxy (sin -x ni proxy configurado)
+            aviso = b"<html><body><h1>Esto es un proxy</h1><p>Usalo con curl -x o configuralo en el navegador.</p></body></html>"
+            respuesta = armar_respuesta("400", "Bad Request", "text/html; charset=utf-8", aviso)
+            client_socket.sendall(create_HTTP_message(respuesta))
+            client_socket.close()
+            continue
+
         host, puerto_destino, ruta = separar_target(request["target"])
-        print(request["method"], host, ruta)
+        print(request["method"], repr(request["target"]), "->", host, ruta)
 
         if ruta.endswith("/403.jpeg"):
+            print("   -> sirvo la imagen local")
             # la imagen del 403 la sirve el proxy desde el disco
             respuesta = armar_respuesta("200", "OK", "image/jpeg", imagen_403)
             client_socket.sendall(create_HTTP_message(respuesta))
 
         elif esta_bloqueado(host, ruta):
+            print("   -> BLOQUEADO, devuelvo 403")
             respuesta = armar_respuesta("403", "Forbidden", "text/html; charset=utf-8", html_403)
             client_socket.sendall(create_HTTP_message(respuesta))
 
         else:
+            print("   -> reenvio al servidor final")
             # el servidor final espera la ruta sola, no la URL completa
             request["target"] = ruta
             request["headers"]["X-ElQuePregunta"] = user

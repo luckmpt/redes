@@ -41,10 +41,17 @@ def separar_target(target):
     return host, 80, ruta
 
 
+def sin_www(texto):
+    """Saca el www. del principio para que dcc y www.dcc sean lo mismo."""
+    return texto[4:] if texto.startswith("www.") else texto
+
+
 def esta_bloqueado(host, ruta):
     """True si el destino aparece en la lista blocked del config."""
+    destino = sin_www(host) + ruta
     for prohibido in blocked:
-        if host == prohibido or (host + ruta).startswith(prohibido):
+        prohibido = sin_www(prohibido)
+        if sin_www(host) == prohibido or destino.startswith(prohibido):
             return True
     return False
 

@@ -1,26 +1,23 @@
-"""Tarea 2: resolver DNS.
-
-Uso: python3 resolver.py [ip] [puerto] [--debug]
-"""
+# Tarea 2: resolver DNS
+# Uso: python3 resolver.py [ip] [puerto] [--debug]
 
 import socket
 import sys
-from collections import Counter, deque
 
 import dnslib
 from dnslib import DNSRecord
 from dnslib.dns import CLASS, QTYPE
 
 root_ip = "198.41.0.4"
-TIMEOUT = 5
-MAX_PROFUNDIDAD = 20
+timeout = 5
+max_profundidad = 20
 
 ip_addres = sys.argv[1] if len(sys.argv) > 1 else "0.0.0.0"
 puerto = int(sys.argv[2]) if len(sys.argv) > 2 else 8000
 DEBUG = "--debug" in sys.argv
 
 # ultimas 20 consultas recibidas y cache de los 3 dominios mas repetidos
-historial = deque(maxlen=20)
+historial = []
 cache = {}
 
 
@@ -29,8 +26,8 @@ def debug(mensaje):
         print(f"(debug) {mensaje}")
 
 
+# pasa un mensaje DNS en bytes a un diccionario
 def parsearDNS(data):
-    """Pasa un mensaje DNS en bytes a un diccionario."""
     d = DNSRecord.parse(data)
     qname = d.get_q().get_qname().label
 
@@ -89,10 +86,10 @@ def parsearDNS(data):
     }
 
 
+# manda la consulta por UDP, devuelve None si el servidor no contesta
 def enviar_query(mensaje_consulta, ip_addr):
-    """Manda la consulta por UDP y devuelve la respuesta, o None si no contesta."""
     sock_resolver = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock_resolver.settimeout(TIMEOUT)
+    sock_resolver.settimeout(timeout)
     try:
         sock_resolver.sendto(mensaje_consulta, (ip_addr, 53))
         data, _ = sock_resolver.recvfrom(4096)
@@ -104,8 +101,8 @@ def enviar_query(mensaje_consulta, ip_addr):
         sock_resolver.close()
 
 
+# saca la primera IP de tipo A de la seccion Answer
 def primera_ip(respuesta):
-    """Saca la primera IP de tipo A de la seccion Answer de una respuesta."""
     d = DNSRecord.parse(respuesta)
     for rr in d.rr:
         if QTYPE.get(rr.rtype) == "A":
@@ -113,9 +110,9 @@ def primera_ip(respuesta):
     return None
 
 
+# resuelve la consulta preguntando desde la raiz hacia abajo
 def resolver(mensaje_consulta: bytes, ip_addr=root_ip, ns_name=".", profundidad=0) -> bytes:
-    """Resuelve la consulta preguntando desde la raiz hacia abajo."""
-    if profundidad > MAX_PROFUNDIDAD:
+    if profundidad > max_profundidad:
         return None
 
     qname = str(DNSRecord.parse(mensaje_consulta).get_q().get_qname())
@@ -170,7 +167,14 @@ while True:
 
     # el cache guarda solo los 3 dominios mas repetidos de las ultimas 20 consultas
     historial.append(qname)
-    mas_repetidos = [dominio for dominio, _ in Counter(historial).most_common(3)]
+    if len(historial) > 20:
+        historial.pop(0)
+
+    # contamos cuantas veces aparece cada dominio en las ultimas 20 consultas
+    conteo = {}
+    for dominio in historial:
+        conteo[dominio] = conteo.get(dominio, 0) + 1
+    mas_repetidos = sorted(conteo, key=lambda d: conteo[d], reverse=True)[:3]
     for dominio in list(cache):
         if dominio not in mas_repetidos:
             del cache[dominio]

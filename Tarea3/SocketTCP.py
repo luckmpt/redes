@@ -9,7 +9,7 @@ class SocketTCP:
         self.secNum = None
 
     @staticmethod
-    def parseSegment(self, segment: bytes):
+    def parseSegment(segment: bytes):
         ACK = bool(int(segment[0:1]))
         SYN = bool(int(segment[1:2]))
         FIN = bool(int(segment[2:3]))
@@ -22,7 +22,7 @@ class SocketTCP:
         }
 
     @staticmethod
-    def createSegment(self, parse: dict):
+    def createSegment(parse: dict):
         SYN = b"0"
         FIN = b"0"
         ACK = b"0"
@@ -52,6 +52,7 @@ class SocketTCP:
         resp, _ = self.socketUDP.recvfrom(16)
         parse_recv = self.parseSegment(resp)
         if parse_recv["SYN"] and parse_recv["ACK"] and parse_recv["seq"] == str(self.secNum + 1).encode():
+            print(f"recibe {parse_recv}")
             self.secNum += 2
             msj2 = self.createSegment({
                 "ACK": True,
@@ -60,6 +61,7 @@ class SocketTCP:
                 "seq": str(self.secNum).encode()
             })
             self.socketUDP.sendto(msj2, addres)
+        self.socketUDP.close()
 
     def accept(self):
         msg, addr = self.socketUDP.recvfrom(16)
@@ -74,14 +76,16 @@ class SocketTCP:
                 "FIN": False,
                 "seq": str(secNum).encode()
             })
+            print("enviar ACK, SYN, seq+1")
             self.socketUDP.sendto(msj1, addr)
             resp, _ = self.socketUDP.recvfrom(16)
             parse_recv2 = self.parseSegment(resp)
             if parse_recv2["ACK"] and parse_recv2["seq"] == str(secNum + 1).encode():
-                self.secNum += 2
+                self.secNum = secNum+1
                 newSocket = SocketTCP()
                 newSocket.ipDestino = ipDestino
                 newSocket.portDestino = portDestino
                 newSocket.secNum = secNum
+                self.socketUDP.close()
                 newSocket.bind(addr)
                 return newSocket, addr

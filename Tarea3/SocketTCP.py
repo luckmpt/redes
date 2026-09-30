@@ -149,6 +149,7 @@ class SocketTCP:
             print(f"recibe {parse_recvInit}")
             lenght_lenght = len(parse_recvInit["message"])
             lenght_full_message = int(parse_recvInit["message"])
+            print(f"largo del mensaje: {lenght_full_message}")
             self.por_recibir = lenght_full_message
             self.direccion = addr
             self.secNum = int(parse_recvInit["seq"]) + lenght_lenght
@@ -172,8 +173,9 @@ class SocketTCP:
             msg_recib = parse_recv["message"]
             self.secNum = int(seq) + len(msg_recib)
             if len(buff) + len(msg_recib) > buff_size:
+                self.sobrante = msg_recib[buff_size-len(buff):]
                 msg_recib = msg_recib[:buff_size-len(buff)]
-                self.sobrante = msg_recib[len(buff):]
+                print(f"sobrante: {self.sobrante}", f"msg_recib: {msg_recib}")
             buff += msg_recib
             msj1 = self.createSegment({
                 "ACK": True,

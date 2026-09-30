@@ -189,3 +189,46 @@ class SocketTCP:
         self.por_recibir -= len(buff)
         print(f"recibido {len(buff)} bytes")
         return buff
+
+    def close(self):
+        msj1 = self.createSegment({
+            "ACK": False,
+            "SYN": False,
+            "FIN": True,
+            "seq": str(self.secNum).zfill(4).encode(),
+            "message": b""
+        })
+        self.socketUDP.sendto(msj1, self.direccion)
+        resp, _ = self.socketUDP.recvfrom(7)
+        parse_recv = self.parseSegment(resp)
+        if parse_recv["ACK"] and parse_recv["FIN"] and parse_recv["seq"] == str(self.secNum + 1).zfill(4).encode():
+            self.secNum += 2
+            msj2 = self.createSegment({
+                "ACK": True,
+                "SYN": False,
+                "FIN": False,
+                "seq": str(self.secNum).zfill(4).encode(),
+                "message": b""
+            })
+            self.socketUDP.sendto(msj2, self.direccion)
+            self.socketUDP.close()
+            print("Cierre de conexion exitoso")
+
+    def recv_close(self):
+        msg, addr = self.socketUDP.recvfrom(7)
+        parse_recv = self.parseSegment(msg)
+        if parse_recv["FIN"]:
+            self.secNum = int(parse_recv["seq"]) + 1
+            msj1 = self.createSegment({
+                "ACK": True,
+                "SYN": False,
+                "FIN": True,
+                "seq": str(self.secNum).zfill(4).encode(),
+                "message": b""
+            })
+            self.socketUDP.sendto(msj1, addr)
+            resp, _ = self.socketUDP.recvfrom(7)
+            parse_recv2 = self.parseSegment(resp)
+            if parse_recv2["ACK"] and parse_recv2["seq"] == str(self.secNum + 1).zfill(4).encode():
+                self.socketUDP.close()
+                print("Cierre de conexion exitoso")

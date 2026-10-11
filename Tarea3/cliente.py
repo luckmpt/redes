@@ -1,17 +1,18 @@
+# Uso: python3 cliente.py <ip> <puerto> [--debug] [--perdida p] < archivo.txt
+import sys
+
 from SocketTCP import SocketTCP
 
-address = ("localhost", 8000)
+ip = sys.argv[1]
+puerto = int(sys.argv[2])
+SocketTCP.debug = "--debug" in sys.argv
+if "--perdida" in sys.argv:
+    SocketTCP.perdida = float(sys.argv[sys.argv.index("--perdida") + 1])
 
-client_socketTCP = SocketTCP()
-client_socketTCP.connect(address)
-# test 1
-message = "Mensje de len=16".encode()
-client_socketTCP.send(message)
-# test 2
-message = "Mensaje de largo 19".encode()
-client_socketTCP.send(message)
-# test 3
-message = "Mensaje de largo 19".encode()
-client_socketTCP.send(message)
-# cierre de la conexion
-client_socketTCP.close()
+# el archivo llega por stdin, se lee entero como bytes
+datos = sys.stdin.buffer.read()
+
+cliente = SocketTCP()
+cliente.connect((ip, puerto))
+cliente.send(datos)
+cliente.close()

@@ -26,22 +26,36 @@ print("IP_packet_v1 == IP_packet_v2 ? {}".format(IP_packet_v1 == IP_packet_v2))
 
 ################# Item 6 #########################
 
-def check_routes(routes_file_name: str, destination_address: tuple[str, int]) -> tuple[str, int] | None:
+def check_routes(routes_file_name: str, destination_address: tuple[str, int], rr: list[str]) -> tuple[str, int] | None:
     with open(routes_file_name, 'r') as routes_file:
+        primero = None
         for line in routes_file:
+            if line.strip() == "" or line.startswith("#"):
+                continue
             ip_destino, primer_puertp, ultimo_puerto, ip_siguiente, puerto_siguiente = line.strip().split(" ")
             ip_destino, _ = ip_destino.split("/")
             if ip_destino == destination_address[0] and int(primer_puertp) <= destination_address[1] <= int(ultimo_puerto):
-                return (ip_siguiente, int(puerto_siguiente))
+                if puerto_siguiente in rr:
+                    if primero is None:
+                        primero = [ip_siguiente, puerto_siguiente]
+                else:
+                    rr.append(puerto_siguiente)
+                    return (ip_siguiente, int(puerto_siguiente), rr)
+        if primero is not None:
+            rr = [primero[1]]
+            return (primero[0], int(primero[1]), rr)
     return None
 
 # test
-assert check_routes("rutas_R1_v2.txt", ("127.0.0.1", 8882)) == ("127.0.0.1", 8882)
-assert check_routes("rutas_R1_v2.txt", ("127.0.0.1", 8883)) == ("127.0.0.1", 8882)
-assert check_routes("rutas_R1_v2.txt", ("127.0.0.1", 8884)) == None
-assert check_routes("rutas_R2_v2.txt", ("127.0.0.1", 8881)) == ("127.0.0.1", 8881)
-assert check_routes("rutas_R2_v2.txt", ("127.0.0.1", 8883)) == ("127.0.0.1", 8883)
-assert check_routes("rutas_R2_v2.txt", ("127.0.0.1", 8884)) == None
-assert check_routes("rutas_R3_v2.txt", ("127.0.0.1", 8881)) == ("127.0.0.1", 8882)
-assert check_routes("rutas_R3_v2.txt", ("127.0.0.1", 8882)) == ("127.0.0.1", 8882)
-assert check_routes("rutas_R3_v2.txt", ("127.0.0.1", 8884)) == None
+rr = []
+assert check_routes("rutas_R1_v2.txt", ("127.0.0.1", 8882), rr) == ("127.0.0.1", 8882, ["8882"])
+assert check_routes("rutas_R1_v2.txt", ("127.0.0.1", 8883), rr) == ("127.0.0.1", 8882, ["8882"])
+assert check_routes("rutas_R1_v2.txt", ("127.0.0.1", 8884), rr) == None
+rr = []
+assert check_routes("rutas_R2_v2.txt", ("127.0.0.1", 8881), rr) == ("127.0.0.1", 8881, ["8881"])
+assert check_routes("rutas_R2_v2.txt", ("127.0.0.1", 8883), rr) == ("127.0.0.1", 8883, ["8881", "8883"])
+assert check_routes("rutas_R2_v2.txt", ("127.0.0.1", 8884), rr) == None
+rr = []
+assert check_routes("rutas_R3_v2.txt", ("127.0.0.1", 8881), rr) == ("127.0.0.1", 8882, ["8882"])
+assert check_routes("rutas_R3_v2.txt", ("127.0.0.1", 8882), rr) == ("127.0.0.1", 8882, ["8882"])
+assert check_routes("rutas_R3_v2.txt", ("127.0.0.1", 8884), rr) == None

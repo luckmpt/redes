@@ -14,16 +14,18 @@ else:
 socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 socket.bind((router_ip, router_port))
 
+rr = []
+
 while True:
     packet, paquete_address = socket.recvfrom(1024)
     ip, port, msj = util.parse_packet(packet)
     if ip == router_ip and port == router_port:
         print(msj.decode())
     else:
-        next_hop = util.check_routes(router_rutas, (ip, port))
+        next_hop = util.check_routes(router_rutas, (ip, port), rr)
         if next_hop is not None:
-            next_ip, next_port = next_hop
-            print(f"redirigiendo paquete {paquete_address} con destino final {(ip, port)} desde {(router_ip,router_port)} hacia {next_hop}")
+            next_ip, next_port, rr = next_hop
+            print(f"redirigiendo paquete {paquete_address} con destino final {(ip, port)} desde {(router_ip,router_port)} hacia {(next_ip, next_port)}")
             socket.sendto(packet, (next_ip, next_port))
         else:
             print(f"No hay rutas hacia {(ip, port)} para paquete {paquete_address}")

@@ -1,6 +1,25 @@
 # Tarea 5
 ## Juxin Xu y Lucas Poblete
 
+## Ejecución de la tarea
+En el directorio hay 3 versiones de red:
+
+- **Version 2 `[R1-R3]`**: Del ejemplo 2 de "Simulando un mini-Internet" pero con el cambio solicitado en esta actividad.
+- **Version 3 `[R1-R5]`**: De la seccion "Material e indicaciónes para la acrividad".
+- **Version 4 `[R0-R6 y RD]`**: A la version anterior se le agrega los routers `R0`, `R6` y `RD`. Donde el ultimo corresponde al *router default*.
+  
+Para ejecutar, primero inicialize cada router:
+```
+python3 router.py 127.0.0.1 888[X] rutas_R[X]_v[Y].txt
+```
+Reemplazando [X] por el numero del router e [Y] por el numero de la version de la red a utilizar. Se deben inicializar todos los routers de una misma versión.
+
+Luego, para enviar el contenido de `archivo.txt` desde `[RX]` a `[RY]` con `TTL = [TTL]`, se debe ejecutar:
+```
+python3 prueba_router.py '127.0.0.1;888[RY];[TL]' 127.0.0.1 888[RX]
+```
+Notese que se debe encerrar los headers `'127.0.0.1;888[RX];[TTL]'` deben encerrarse en comillas, de lo contrario, la terminal separa con los `;` en varios comandos distintos.
+
 ## Anotaciones de Mini-Internet sin TTL
 1. **(Item 1)** Antes de comenzar a programar, describa brevemente en su informe las similitudes y diferencias entre la tabla de rutas utilizadas para esta actividad, versus una tabla de rutas real.
 > En las tablas de rutas utilizadas para esta atividad, se muestran rangos de puertos asociados a un puerto donde hacer forwarding, por otro lado, las tablas reales, guardan rangos de direcciones IP asociadas a la direccion de IP de un router donde hacer forwarding.
@@ -100,3 +119,8 @@
 >
 >
 >```
+## Pruebas Mini-Internet con TTL
+1. Repita la primera prueba de la parte 1 (donde indujo error en la tabla de rutas) y vea qué ocurre. Use un TTL inicial TTL = 10 ¿Qué diferencias observa? Anote sus observaciones brevemente en su informe.
+> Se forma el mismo bucle entre `R1` y `R2` solo que cada salto envia un paquete por cada linea de `archivo.txt`, sin embargo, este bucle termina en `R1` cuando `TTL` llega a `0` en cada paquete, imprimiendo `Se recibió paquete ('127.0.0.1', 8883) con TTL 0` por cada linea del archivo.
+2. Considere la configuración de 5 routers vista en la parte 1. Use el código implementado en el paso 4 con un archivo grande (de varias líneas) ¿Qué ocurre con el orden de los paquetes? Anote sus observaciones en el informe.
+> Las lineas del archivo llegaron desordenadas con saltos de linea entre medio, ademas, una linea no llego, pues fue descartada por `R3` pues su `TTL` llego a 0.

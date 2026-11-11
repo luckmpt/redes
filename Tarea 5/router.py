@@ -18,14 +18,17 @@ rr = []
 
 while True:
     packet, paquete_address = socket.recvfrom(1024)
-    ip, port, msj = util.parse_packet(packet)
+    ip, port, TTL, msj = util.parse_packet(packet)
     if ip == router_ip and port == router_port:
         print(msj.decode())
+    elif TTL <= 0:
+        print(f"Se recibió paquete {(ip, port)} con TTL 0")
     else:
         next_hop = util.check_routes(router_rutas, (ip, port), rr)
         if next_hop is not None:
             next_ip, next_port, rr = next_hop
             print(f"redirigiendo paquete {paquete_address} con destino final {(ip, port)} desde {(router_ip,router_port)} hacia {(next_ip, next_port)}")
-            socket.sendto(packet, (next_ip, next_port))
+            newPacket = util.create_packet((ip, port, TTL - 1, msj))
+            socket.sendto(newPacket, (next_ip, next_port))
         else:
             print(f"No hay rutas hacia {(ip, port)} para paquete {paquete_address}")

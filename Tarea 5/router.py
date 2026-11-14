@@ -6,7 +6,7 @@ if len(sys.argv) >= 4:
     router_ip = sys.argv[1]
     router_port = int(sys.argv[2])
     router_rutas = sys.argv[3]
-
+    
 else:
     print("Usage: python3 router.py router_IP router_puerto router_rutas.txt")
     sys.exit(1)
@@ -14,16 +14,21 @@ else:
 socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 socket.bind((router_ip, router_port))
 
+rr = []
+
 while True:
     packet, paquete_address = socket.recvfrom(1024)
-    ip, port, msj = util.parse_packet(packet)
+    ip, port, TTL, msj = util.parse_packet(packet)
     if ip == router_ip and port == router_port:
         print(msj.decode())
+    elif TTL <= 0:
+        print(f"Se recibió paquete {(ip, port)} con TTL 0")
     else:
-        next_hop = util.check_routes(router_rutas, (ip, port))
+        next_hop = util.check_routes(router_rutas, (ip, port), rr)
         if next_hop is not None:
-            next_ip, next_port = next_hop
-            print(f"redirigiendo paquete {packet} con destino final {(ip, port)} desde {(router_ip,router_port)} hacia {next_hop}")
-            socket.sendto(packet, (next_ip, next_port))
+            next_ip, next_port, rr = next_hop
+            print(f"redirigiendo paquete {paquete_address} con destino final {(ip, port)} desde {(router_ip,router_port)} hacia {(next_ip, next_port)}")
+            newPacket = util.create_packet((ip, port, TTL - 1, msj))
+            socket.sendto(newPacket, (next_ip, next_port))
         else:
-            print(f"No hay rutas hacia {(ip, port)} para paquete {packet}")
+            print(f"No hay rutas hacia {(ip, port)} para paquete {paquete_address}")

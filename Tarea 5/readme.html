@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Tarea 5</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.code,
+pre {
+  background-color: #aaabac;
+  border-radius: 6px;
+
+}
+
+pre {
+  padding: 16px;
+  overflow-x: auto;
+}
+
+pre code {
+  background-color: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+@media print {
+  body,
+  .vscode-body,
+  pre,
+  pre code {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  pre,
+  pre code {
+    background-color: #aaabac !important;
+  }
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<h1 id="tarea-5">Tarea 5</h1>
+<h2 id="juxin-xu-y-lucas-poblete">Juxin Xu y Lucas Poblete</h2>
+<h2 id="ejecución-de-la-tarea">Ejecución de la tarea</h2>
+<p>En el directorio hay 3 versiones de red:</p>
+<ul>
+<li><strong>Version 2 <code>[R1-R3]</code></strong>: Del ejemplo 2 de &quot;Simulando un mini-Internet&quot; pero con el cambio solicitado en esta actividad.</li>
+<li><strong>Version 3 <code>[R1-R5]</code></strong>: De la seccion &quot;Material e indicaciónes para la acrividad&quot;.</li>
+<li><strong>Version 4 <code>[R0-R6 y RD]</code></strong>: A la version anterior se le agrega los routers <code>R0</code>, <code>R6</code> y <code>RD</code>. Donde el ultimo corresponde al <em>router default</em>.</li>
+</ul>
+<p>Para ejecutar, primero inicialize cada router:</p>
+<pre><code>python3 router.py 127.0.0.1 888[X] rutas_R[X]_v[Y].txt
+</code></pre>
+<p>Reemplazando [X] por el numero del router e [Y] por el numero de la version de la red a utilizar. Se deben inicializar todos los routers de una misma versión.</p>
+<p>Luego, para enviar el contenido de <code>archivo.txt</code> desde <code>[RX]</code> a <code>[RY]</code> con <code>TTL = [TTL]</code>, se debe ejecutar:</p>
+<pre><code>python3 prueba_router.py '127.0.0.1;888[RY];[TL]' 127.0.0.1 888[RX]
+</code></pre>
+<p>Notese los headers <code>'127.0.0.1;888[RX];[TTL]'</code> deben encerrarse en comillas, de lo contrario, la terminal separa con los <code>;</code> en varios comandos distintos.</p>
+<h2 id="anotaciones-de-mini-internet-sin-ttl">Anotaciones de Mini-Internet sin TTL</h2>
+<ol>
+<li><strong>(Item 1)</strong> Antes de comenzar a programar, describa brevemente en su informe las similitudes y diferencias entre la tabla de rutas utilizadas para esta actividad, versus una tabla de rutas real.</li>
+</ol>
+<blockquote>
+<p>En las tablas de rutas utilizadas para esta atividad, se muestran rangos de puertos asociados a un puerto donde hacer forwarding, por otro lado, las tablas reales, guardan rangos de direcciones IP asociadas a la direccion de IP de un router donde hacer forwarding.</p>
+</blockquote>
+<ol start="2">
+<li><strong>(Item 5)</strong> La forma en que su script recibe la información descrita deberá ser definida por usted y explicada apropiadamente en su informe.</li>
+</ol>
+<blockquote>
+<p>primero se debe ejecutar el script con:</p>
+<pre><code>python3 cliente.py
+</code></pre>
+<p>Luego, cada vez que se desee enviar un mensaje, se debe indicar la ip y puerto final junto con el mensaje siguiendo la estructura separada por ; descrito en &quot;Simulando un mini-internet&quot; y luego la ip y puerto de envio en los siguientes inputs:</p>
+<pre><code>IP_router_final;puerto_router_final;mensaje : 127.0.0.1;8883;hola
+IP_envio;puerto_envio : 127.0.0.1;8882
+</code></pre>
+</blockquote>
+<ol start="3">
+<li><strong>(item 8)</strong> incluya una breve descripción en su informe sobre cómo maneja round-robin su código.</li>
+</ol>
+<blockquote>
+<p>Se crea la variable <code>rr = []</code> donde se almacenan los puertos ya visitados por el router, esta variable es pasada a la funcion <code>check_routes(routes_file_name: str, destination_address: tuple[str, int], rr: list[str]) -&gt; tuple[str, int] | None</code>, y al leer la tabla de ruta, encuentra un puerto que tiene acceso al puerto final, primero verificara que no este en <code>rr</code>, lo añade a <code>rr</code> y entrega la direccion encontrada, ahora, si esta en <code>rr</code> y es el primer puerto encontrado, se guarda en otra varible, si esta en <code>rr</code> y no es el primer puerto encontrado, simplemente se pasa al siguiente. Cuando se hayan visitado todos los puertos y todos estaban en <code>rr</code>, se entrega simplemente el primer puerto encontrado.</p>
+</blockquote>
+<ol start="4">
+<li><strong>(Item 9)</strong> ¿En que posición (línea) de la tabla debería ir la ruta default? Añada en su informe cómo queda su nueva tabla de rutas y la respuesta a esta pregunta.</li>
+</ol>
+<blockquote>
+<p>En las ultimas dos lineas de cada una de las otras tablas, se agrega el envio al puerto 7000 para rangos entre [0, 8879] y [8887, 65535].</p>
+<pre><code>...
+127.0.0.1/24 0 8879 127.0.0.1 7000
+127.0.0.1/24 8887 65535 127.0.0.1 7000
+</code></pre>
+</blockquote>
+<h2 id="pruebas-mini-internet-sin-ttl">Pruebas Mini-Internet sin TTL</h2>
+<ol>
+<li>pruebe qué ocurre si alguien configura mal una de las tablas de rutas y coméntelo brevemente en su informe.</li>
+</ol>
+<blockquote>
+<p>Si se configura mal una tabla de rutas, como en el caso del ejemplo que los mensajes que van hacia <code>R3</code> y llegan a <code>R1</code>y <code>R2</code>, sus tablas de rutas los redirijen a <code>R25. pruebe qué ocurre si alguien configura mal una de las tablas de rutas y coméntelo brevemente en su informe. Si se configura mal una tabla de rutas, como en el caso del ejemplo que los mensajes que van hacia </code>R3<code>y llegan a</code>R1<code>y</code>R2<code>, sus tablas de rutas de cada uno los redirijen a </code>R2<code>y</code>R1` respectivamente, esto provoca que el mensaje este saltando entre ambos routers infinitamente, provocando un bucle sin fin en ambos routers. Es decir, el mensaje pasa a estar perdido en la red sin nunca llegar a su destino.</p>
+</blockquote>
+<ol start="2">
+<li>Usando las rutas de la estructura de 5 routers, pruebe su código enviando paquetes a R1 con destino R5 y vea que su función de rutas efectivamente usa round-robin, es decir, va alternando entre rutas. Haga varias pruebas ¿cuántos saltos dan los paquetes? ¿siempre dan la misma cantidad de saltos?¿cómo se compara la cantidad de saltos que dan los paquetes versus la cantidad de saltos mínima? Anote sus observaciones en el informe.</li>
+</ol>
+<blockquote>
+<p>Si hace correctamente round robin, pues en la primera prueba, <code>R2</code> el paquete llega 3 veces, y las tres veces fueron redirijidos a un router distinto.</p>
+<p>En el primer test, el paquete dio 7 saltos, en el segundo test el paquete dio 3 saltos, por lo que no siempre dan la misma cantidad de saltos.</p>
+<p>La cantidad de saltos minima son 3 saltos, que fue justamente el resultado del segundo test, sin embargo, el primer test realizo 7 saltos, que es mas del doble.</p>
+</blockquote>
+<ol start="3">
+<li>Repita las pruebas del punto 2 utilizando la estructura que se le pidió crear en el test 2 del paso 8 y escriba sus observaciones en su informe. Añada en su informe los contenidos de los distintos archivos de rutas que debió crear.</li>
+</ol>
+<blockquote>
+<p>En el primer test, el paquete dio 9 saltos, en el segundo test el paquete dio 5 saltos, en el tercero dio 7 saltos. Por lo que no se repiten la cantidad de saltos y se alejan bastante de la cantidad minima que siguen siendo 3. Los aarchivos de ruta nuevos son los siguientes:</p>
+<pre><code># rutas_R0_v4.txt
+
+127.0.0.1/24 8881 8886 127.0.0.1 8881
+127.0.0.1/24 8881 8886 127.0.0.1 8882
+127.0.0.1/24 0 8879 127.0.0.1 7000
+127.0.0.1/24 8887 65535 127.0.0.1 7000
+
+# rutas_R1_v4.txt
+
+127.0.0.1/24 8882 8886 127.0.0.1 8882
+127.0.0.1/24 8882 8886 127.0.0.1 8880
+127.0.0.1/24 8880 8880 127.0.0.1 8882
+127.0.0.1/24 8880 8880 127.0.0.1 8880
+127.0.0.1/24 0 8879 127.0.0.1 7000
+127.0.0.1/24 8887 65535 127.0.0.1 7000
+
+# rutas_R2_v4.txt
+
+127.0.0.1/24 8880 8881 127.0.0.1 8881
+127.0.0.1/24 8880 8881 127.0.0.1 8880
+127.0.0.1/24 8883 8886 127.0.0.1 8883
+127.0.0.1/24 8883 8886 127.0.0.1 8884
+127.0.0.1/24 8883 8886 127.0.0.1 8886
+127.0.0.1/24 0 8879 127.0.0.1 7000
+127.0.0.1/24 8887 65535 127.0.0.1 7000
+
+# rutas_R3_v4.txt
+
+127.0.0.1/24 8880 8882 127.0.0.1 8882
+127.0.0.1/24 8880 8882 127.0.0.1 8885
+127.0.0.1/24 8884 8886 127.0.0.1 8882
+127.0.0.1/24 8884 8886 127.0.0.1 8885
+127.0.0.1/24 0 8879 127.0.0.1 7000
+127.0.0.1/24 8887 65535 127.0.0.1 7000
+
+# rutas_R4_v4.txt
+
+127.0.0.1/24 8880 8883 127.0.0.1 8882
+127.0.0.1/24 8880 8883 127.0.0.1 8885
+127.0.0.1/24 8885 8886 127.0.0.1 8882
+127.0.0.1/24 8885 8886 127.0.0.1 8885
+127.0.0.1/24 0 8879 127.0.0.1 7000
+127.0.0.1/24 8887 65535 127.0.0.1 7000
+
+# rutas_R5_v4.txt
+
+127.0.0.1/24 8881 8884 127.0.0.1 8884
+127.0.0.1/24 8881 8884 127.0.0.1 8883
+127.0.0.1/24 8886 8886 127.0.0.1 8884
+127.0.0.1/24 8886 8886 127.0.0.1 8883
+127.0.0.1/24 0 8879 127.0.0.1 7000
+127.0.0.1/24 8887 65535 127.0.0.1 7000
+
+# rutas_R6_v4.txt
+
+127.0.0.1/24 8880 8885 127.0.0.1 8882
+127.0.0.1/24 8880 8885 127.0.0.1 8883
+127.0.0.1/24 0 8879 127.0.0.1 7000
+127.0.0.1/24 8887 65535 127.0.0.1 7000
+
+# rutas_R6_v4.txt
+
+
+</code></pre>
+</blockquote>
+<h2 id="pruebas-mini-internet-con-ttl">Pruebas Mini-Internet con TTL</h2>
+<ol>
+<li>Repita la primera prueba de la parte 1 (donde indujo error en la tabla de rutas) y vea qué ocurre. Use un TTL inicial TTL = 10 ¿Qué diferencias observa? Anote sus observaciones brevemente en su informe.</li>
+</ol>
+<blockquote>
+<p>Se forma el mismo bucle entre <code>R1</code> y <code>R2</code> solo que cada salto envia un paquete por cada linea de <code>archivo.txt</code>, sin embargo, este bucle termina en <code>R1</code> cuando <code>TTL</code> llega a <code>0</code> en cada paquete, imprimiendo <code>Se recibió paquete ('127.0.0.1', 8883) con TTL 0</code> por cada linea del archivo.</p>
+</blockquote>
+<ol start="2">
+<li>Considere la configuración de 5 routers vista en la parte 1. Use el código implementado en el paso 4 con un archivo grande (de varias líneas) ¿Qué ocurre con el orden de los paquetes? Anote sus observaciones en el informe.</li>
+</ol>
+<blockquote>
+<p>Las lineas del archivo llegaron desordenadas con saltos de linea entre medio, ademas, una linea no llego, pues fue descartada por <code>R3</code> pues su <code>TTL</code> llego a 0.</p>
+</blockquote>
+
+            
+            
+        </body>
+        </html>

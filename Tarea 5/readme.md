@@ -18,7 +18,7 @@ Luego, para enviar el contenido de `archivo.txt` desde `[RX]` a `[RY]` con `TTL 
 ```
 python3 prueba_router.py '127.0.0.1;888[RY];[TL]' 127.0.0.1 888[RX]
 ```
-Notese que se debe encerrar los headers `'127.0.0.1;888[RX];[TTL]'` deben encerrarse en comillas, de lo contrario, la terminal separa con los `;` en varios comandos distintos.
+Notese los headers `'127.0.0.1;888[RX];[TTL]'` deben encerrarse en comillas, de lo contrario, la terminal separa con los `;` en varios comandos distintos.
 
 ## Anotaciones de Mini-Internet sin TTL
 1. **(Item 1)** Antes de comenzar a programar, describa brevemente en su informe las similitudes y diferencias entre la tabla de rutas utilizadas para esta actividad, versus una tabla de rutas real.
